@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:reviewer_mobile/main.dart';
-import 'package:reviewer_mobile/theme/app_colors.dart'; // Importando o AppColors
+import 'package:reviewer_mobile/shared/widgets/custom_bottom_app_bar.dart';
+import 'package:reviewer_mobile/shared/widgets/review_card.dart';
+import 'package:reviewer_mobile/theme/app_colors.dart';
 import 'package:routefly/routefly.dart';
+
+import '../main.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -27,11 +30,11 @@ class HomePage extends StatelessWidget {
         preferredSize: const Size.fromHeight(70),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          color: AppColors.primary,
+          color: AppColors.lightGray,
           child: Row(
             children: [
               const CircleAvatar(
-                backgroundColor: AppColors.mediumText,
+                backgroundColor: AppColors.error,
                 radius: 25,
                 child: Icon(Icons.person, color: Colors.white),
               ),
@@ -48,76 +51,21 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
-      body: ListView.builder(
+      body: ListView.builder( // Utilizando ReviewCard com Mock
         itemCount: mockReviews.length,
         itemBuilder: (context, index) {
           final review = mockReviews[index];
-          return ListTile(
-            title: Text(
-              review['user'],
-              style: const TextStyle(color: AppColors.darkText),
-            ),
-            subtitle: Text(
-              review['review'],
-              style: const TextStyle(color: AppColors.mediumText),
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: List.generate(5, (i) {
-                return Icon(
-                  i < review['stars'] ? Icons.star : Icons.star_border,
-                  color: AppColors.primaryVariant,
-                  size: 20,
-                );
-              }),
-            ),
+          return ReviewCard(
+              user: review['user'] ?? 'Anônimo',
+              review: review['review']!,
+              stars: review['stars'] ?? 0,
+              avatarUrl: null,
           );
         },
       ),
-      bottomNavigationBar: BottomAppBar(
-        color: AppColors.lightGray,
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 6,
-        child: SizedBox(
-          height: 60,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.home),
-                color: AppColors.darkText,
-                onPressed: () {
-                  Routefly.push(routePaths.appHome);
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.search),
-                color: AppColors.darkText,
-                onPressed: () {
-                  //Routefly.push(routePaths.search);
-                },
-              ),
-              const SizedBox(width: 40), // espaço para o botão central
-              IconButton(
-                icon: const Icon(Icons.notifications),
-                color: AppColors.darkText,
-                onPressed: () {
-                  //Routefly.push(routePaths.notifications);
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.person),
-                color: AppColors.darkText,
-                onPressed: () {
-                  //Routefly.push(routePaths.profile);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
+      bottomNavigationBar: const CustomBottomAppBar(), // Usando o componente
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.accent,
+        backgroundColor: AppColors.highlight,
         child: const Icon(Icons.add, color: Colors.white),
         onPressed: () {
           Routefly.push(routePaths.review.createReview);
