@@ -4,9 +4,12 @@ import 'package:flutter/widgets.dart';
 import 'package:routefly/routefly.dart';
 
 import 'app/app_home_page.dart' as a0;
-import 'app/review/create_review_page.dart' as a1;
+import 'app/profile/profile_page.dart' as a1;
+import 'app/review/create_review_page.dart' as a2;
 
 Route b0Builder(BuildContext ctx, RouteSettings settings) =>
     Routefly.defaultRouteBuilder(ctx, settings, const a0.HomePage());
 Route b1Builder(BuildContext ctx, RouteSettings settings) =>
-    Routefly.defaultRouteBuilder(ctx, settings, const a1.CreateReviewPage());
+    Routefly.defaultRouteBuilder(ctx, settings, const a1.ProfilePage());
+Route b2Builder(BuildContext ctx, RouteSettings settings) =>
+    Routefly.defaultRouteBuilder(ctx, settings, const a2.CreateReviewPage());
