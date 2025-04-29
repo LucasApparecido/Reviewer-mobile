@@ -28,7 +28,7 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.mediumText,
         title: const Text(
           'Criar Review',
           style: TextStyle(color: AppColors.darkText),
@@ -51,7 +51,7 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
                     borderSide: BorderSide(color: AppColors.mediumText),
                   ),
                   focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primary),
+                    borderSide: BorderSide(color: AppColors.mediumText),
                   ),
                 ),
                 style: const TextStyle(color: AppColors.darkText),
@@ -73,7 +73,7 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
                     },
                     icon: Icon(
                       index < _stars ? Icons.star : Icons.star_border,
-                      color: AppColors.primaryVariant,
+                      color: AppColors.stars,
                       size: 32,
                     ),
                   );
@@ -84,7 +84,7 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accent,
+                    backgroundColor: AppColors.highlight,
                     foregroundColor: Colors.white,
                   ),
                   onPressed: _submitReview,
