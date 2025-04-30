@@ -4,7 +4,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthService {
   final _storage = const FlutterSecureStorage();
-  final String _baseUrl = 'https://seu-backend.com'; // Substitua pelo URL do seu backend
+  final String _baseUrl =
+      'http://localhost:8080/'; // Substitua pelo URL do seu backend
 
   Future<bool> login(String email, String password) async {
     final response = await http.post(
