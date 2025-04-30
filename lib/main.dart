@@ -10,14 +10,14 @@ void main() {
 
 @Main()
 class ReviewSocialApp extends StatelessWidget {
-  const ReviewSocialApp({Key? key}) : super(key: key);
+  const ReviewSocialApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
       routerConfig: Routefly.routerConfig(
         routes: routes, // Rota gerada automaticamente
-        initialPath: routePaths.appHome
+        initialPath: routePaths.appHome,
       ),
       debugShowCheckedModeBanner: false,
     );

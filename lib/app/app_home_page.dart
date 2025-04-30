@@ -7,19 +7,11 @@ import 'package:routefly/routefly.dart';
 import '../main.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   final List<Map<String, dynamic>> mockReviews = const [
-    {
-      'user': 'João',
-      'review': 'Achei esse livro maravilhoso!',
-      'stars': 5,
-    },
-    {
-      'user': 'Maria',
-      'review': 'O filme foi meio fraco...',
-      'stars': 2,
-    },
+    {'user': 'João', 'review': 'Achei esse livro maravilhoso!', 'stars': 5},
+    {'user': 'Maria', 'review': 'O filme foi meio fraco...', 'stars': 2},
   ];
 
   @override
@@ -51,15 +43,16 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
-      body: ListView.builder( // Utilizando ReviewCard com Mock
+      body: ListView.builder(
+        // Utilizando ReviewCard com Mock
         itemCount: mockReviews.length,
         itemBuilder: (context, index) {
           final review = mockReviews[index];
           return ReviewCard(
-              user: review['user'] ?? 'Anônimo',
-              review: review['review']!,
-              stars: review['stars'] ?? 0,
-              avatarUrl: null,
+            user: review['user'] ?? 'Anônimo',
+            review: review['review']!,
+            stars: review['stars'] ?? 0,
+            avatarUrl: null,
           );
         },
       ),

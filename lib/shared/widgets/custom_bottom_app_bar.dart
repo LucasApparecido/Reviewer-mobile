@@ -4,9 +4,8 @@ import 'package:reviewer_mobile/theme/app_colors.dart';
 
 import '../../main.dart';
 
-
 class CustomBottomAppBar extends StatelessWidget {
-  const CustomBottomAppBar({Key? key}) : super(key: key);
+  const CustomBottomAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -3,7 +3,7 @@ import 'package:reviewer_mobile/theme/app_colors.dart'; // Importando as cores
 import 'package:routefly/routefly.dart';
 
 class CreateReviewPage extends StatefulWidget {
-  const CreateReviewPage({Key? key}) : super(key: key);
+  const CreateReviewPage({super.key});
 
   @override
   State<CreateReviewPage> createState() => _CreateReviewPageState();
@@ -55,7 +55,11 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
                   ),
                 ),
                 style: const TextStyle(color: AppColors.darkText),
-                validator: (value) => value == null || value.isEmpty ? 'Campo obrigatório' : null,
+                validator:
+                    (value) =>
+                        value == null || value.isEmpty
+                            ? 'Campo obrigatório'
+                            : null,
               ),
               const SizedBox(height: 24),
               const Text(

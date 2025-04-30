@@ -8,12 +8,12 @@ class ReviewCard extends StatelessWidget {
   final String? avatarUrl;
 
   const ReviewCard({
-    Key? key,
+    super.key,
     required this.user,
     required this.review,
     required this.stars,
     this.avatarUrl,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +31,13 @@ class ReviewCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 20,
-                  backgroundImage: avatarUrl != null
-                      ? NetworkImage(avatarUrl!)
-                      : null,
-                  child: avatarUrl == null
-                      ? const Icon(Icons.person, color: Colors.white)
-                      : null,
+                  backgroundImage:
+                      avatarUrl != null ? NetworkImage(avatarUrl!) : null,
                   backgroundColor: AppColors.mediumText,
+                  child:
+                      avatarUrl == null
+                          ? const Icon(Icons.person, color: Colors.white)
+                          : null,
                 ),
                 const SizedBox(width: 12),
                 Text(

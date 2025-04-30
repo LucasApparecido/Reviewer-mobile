@@ -6,15 +6,11 @@ import 'package:routefly/routefly.dart';
 import '../../main.dart';
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({super.key});
 
   final List<Map<String, dynamic>> mockUserReviews = const [
-    {
-      'review': 'Review incrível do livro XYZ!',
-    },
-    {
-      'review': 'Review sobre o novo filme de ação!',
-    },
+    {'review': 'Review incrível do livro XYZ!'},
+    {'review': 'Review sobre o novo filme de ação!'},
   ];
 
   @override
@@ -23,10 +19,7 @@ class ProfilePage extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.mediumText,
-        title: const Text(
-          'Perfil',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Perfil', style: TextStyle(color: Colors.white)),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -65,7 +58,10 @@ class ProfilePage extends StatelessWidget {
               itemBuilder: (context, index) {
                 final review = mockUserReviews[index];
                 return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
@@ -104,10 +100,7 @@ class ProfilePage extends StatelessWidget {
         onPressed: () {
           // Exemplo de ação nos botões
         },
-        child: Text(
-          text,
-          style: const TextStyle(color: AppColors.mediumText),
-        ),
+        child: Text(text, style: const TextStyle(color: AppColors.mediumText)),
       ),
     );
   }
