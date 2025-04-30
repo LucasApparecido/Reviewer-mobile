@@ -20,6 +20,37 @@ class HomePage extends StatelessWidget {
       'review': 'O filme foi meio fraco...',
       'stars': 2,
     },
+    {
+      'user': 'Maria',
+      'review': 'O filme foi meio fraco...',
+      'stars': 2,
+    },
+    {
+      'user': 'Maria',
+      'review': 'O filme foi meio fraco...',
+      'stars': 2,
+    },
+    {
+      'user': 'Maria',
+      'review': 'O filme foi meio fraco...',
+      'stars': 2,
+    },
+    {
+      'user': 'Maria',
+      'review': 'O filme foi meio fraco...',
+      'stars': 2,
+    },
+    {
+      'user': 'Maria',
+      'review': 'O filme foi meio fraco...',
+      'stars': 2,
+    },
+    {
+      'user': 'Maria',
+      'review': 'O filme foi meio fraco...',
+      'stars': 2,
+    },
+
   ];
 
   @override

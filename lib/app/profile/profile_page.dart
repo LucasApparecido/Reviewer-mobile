@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:reviewer_mobile/shared/widgets/custom_bottom_app_bar.dart';
 import 'package:reviewer_mobile/theme/app_colors.dart';
 import 'package:routefly/routefly.dart';
+import 'package:reviewer_mobile/shared/widgets/review_card.dart';
+
 
 import '../../main.dart';
 
@@ -36,7 +38,7 @@ class ProfilePage extends StatelessWidget {
             CircleAvatar(
               radius: 40,
               backgroundImage: NetworkImage(
-                'https://i.pravatar.cc/150?img=5', // Foto Mock - depois troca pela foto real
+                'https://i.pravatar.cc/150?img=09', // Foto Mock - depois troca pela foto real
               ),
             ),
             const SizedBox(height: 12),
@@ -64,18 +66,39 @@ class ProfilePage extends StatelessWidget {
               itemCount: mockUserReviews.length,
               itemBuilder: (context, index) {
                 final review = mockUserReviews[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      review['review']!,
-                      style: const TextStyle(color: AppColors.darkText),
-                    ),
-                  ),
+                return ReviewCard(
+                  user: 'Killua Zoldyk',
+                  review: review['review']!,
+                  stars: 5, // ou alguma nota mockada por enquanto
+                  showActions: true,
+                  onEdit: () {
+                    Routefly.push(routePaths.review.editReview);                  },
+                  onDelete: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text('Excluir Review'),
+                        content: const Text('Deseja realmente excluir esta review?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancelar'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              // aqui remove da lista ou chama API
+                            },
+                            child: const Text('Excluir'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 );
               },
             ),
+
           ],
         ),
       ),

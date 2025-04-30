@@ -18,11 +18,20 @@ List<RouteEntity> get routes => [
     uri: Uri.parse('review/create_review'),
     routeBuilder: b2Builder,
   ),
+  RouteEntity(
+    key: 'review/edit_review',
+    uri: Uri.parse('review/edit_review'),
+    routeBuilder: b3Builder,
+  ),
 ];
 
 const routePaths = (
   path: '/',
   appHome: '/app_home',
   profile: '/profile',
-  review: (path: '/review', createReview: '/review/create_review'),
+  review: (
+    path: '/review',
+    createReview: '/review/create_review',
+    editReview: '/review/edit_review',
+  ),
 );
