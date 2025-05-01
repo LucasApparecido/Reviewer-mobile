@@ -6,6 +6,9 @@ class ReviewCard extends StatelessWidget {
   final String review;
   final int stars;
   final String? avatarUrl;
+  final bool showActions;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const ReviewCard({
     super.key,
@@ -13,7 +16,41 @@ class ReviewCard extends StatelessWidget {
     required this.review,
     required this.stars,
     this.avatarUrl,
-  });
+
+    this.showActions = false,
+    this.onEdit,
+    this.onDelete,
+  }) : super(key: key);
+
+  void _showMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder:
+          (_) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.edit),
+                  title: const Text('Editar'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    if (onEdit != null) onEdit!();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.delete),
+                  title: const Text('Excluir'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    if (onDelete != null) onDelete!();
+                  },
+                ),
+              ],
+            ),
+          ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,38 +63,46 @@ class ReviewCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Topo: avatar + nome
+            // TOPO: avatar + nome + botão de ações
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundImage:
-                      avatarUrl != null ? NetworkImage(avatarUrl!) : null,
-                  backgroundColor: AppColors.mediumText,
-                  child:
-                      avatarUrl == null
-                          ? const Icon(Icons.person, color: Colors.white)
-                          : null,
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundImage:
+                          avatarUrl != null ? NetworkImage(avatarUrl!) : null,
+                      child:
+                          avatarUrl == null
+                              ? const Icon(Icons.person, color: Colors.white)
+                              : null,
+                      backgroundColor: AppColors.mediumText,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      user,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: AppColors.darkText,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  user,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: AppColors.darkText,
+                if (showActions)
+                  IconButton(
+                    icon: const Icon(Icons.more_vert),
+                    onPressed: () => _showMenu(context),
                   ),
-                ),
               ],
             ),
             const SizedBox(height: 12),
-            // Texto da review
             Text(
               review,
               style: const TextStyle(fontSize: 14, color: AppColors.mediumText),
             ),
             const SizedBox(height: 12),
-            // Estrelas
             Row(
               children: List.generate(5, (i) {
                 return Icon(
@@ -68,19 +113,20 @@ class ReviewCard extends StatelessWidget {
               }),
             ),
             const SizedBox(height: 12),
-            // Ações (moeda futura, comentar)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 IconButton(
-                  onPressed: () {},
-                  icon: Icon(Icons.monetization_on, size: 18),
+                  onPressed: () {
+                    // moeda futura
+                  },
+                  icon: const Icon(Icons.monetization_on, size: 18),
                   style: IconButton.styleFrom(
                     backgroundColor: Colors.green,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    padding: EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(12),
                   ),
                 ),
                 ElevatedButton.icon(

@@ -4,6 +4,7 @@ import 'package:reviewer_mobile/shared/widgets/custom_bottom_app_bar.dart';
 import 'package:reviewer_mobile/shared/widgets/review_card.dart';
 import 'package:reviewer_mobile/theme/app_colors.dart';
 import 'package:routefly/routefly.dart';
+import 'package:reviewer_mobile/shared/widgets/review_card.dart';
 
 import '../../main.dart';
 
@@ -56,7 +57,7 @@ class _ProfilePageState extends State<ProfilePage> {
             CircleAvatar(
               radius: 40,
               backgroundImage: NetworkImage(
-                'https://i.pravatar.cc/150?img=5', // Foto Mock - depois troca pela foto real
+                'https://i.pravatar.cc/150?img=09', // Foto Mock - depois troca pela foto real
               ),
             ),
             const SizedBox(height: 12),
@@ -86,6 +87,71 @@ class _ProfilePageState extends State<ProfilePage> {
                 avatarUrl: 'https://i.pravatar.cc/150?img=5', // Avatar fixo
               );
             }).toList(),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _userReviews.length,
+              itemBuilder: (context, index) {
+                final review = _userReviews[index];
+                return ReviewCard(
+                  user: 'Killua Zoldyk', // Nome fixo ou dinâmico, se disponível
+                  review: review.content ?? '',
+                  stars: review.rating ?? 0,
+                  showActions: true,
+                  onEdit: () {
+                    Routefly.push(routePaths.review.editReview);
+                  },
+                  onDelete: () {
+                    showDialog(
+                      context: context,
+                      builder:
+                          (_) => AlertDialog(
+                            title: const Text('Excluir Review'),
+                            content: const Text(
+                              'Deseja realmente excluir esta review?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Cancelar'),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  Navigator.pop(context);
+                                  try {
+                                    // Chama a API para excluir o review
+                                    await _reviewApi.delete(review.id!);
+                                    setState(() {
+                                      _userReviews.removeAt(
+                                        index,
+                                      ); // Remove da lista local
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Review excluído com sucesso!',
+                                        ),
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Erro ao excluir review: $e',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                                child: const Text('Excluir'),
+                              ),
+                            ],
+                          ),
+                    );
+                  },
+                );
+              },
+            ),
           ],
         ),
       ),
