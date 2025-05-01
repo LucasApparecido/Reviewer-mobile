@@ -1,17 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:reviewer_mobile/openapi/lib/api.dart';
 import 'package:reviewer_mobile/shared/widgets/custom_bottom_app_bar.dart';
+import 'package:reviewer_mobile/shared/widgets/review_card.dart';
 import 'package:reviewer_mobile/theme/app_colors.dart';
 import 'package:routefly/routefly.dart';
 
 import '../../main.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
-  final List<Map<String, dynamic>> mockUserReviews = const [
-    {'review': 'Review incrível do livro XYZ!'},
-    {'review': 'Review sobre o novo filme de ação!'},
-  ];
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final _reviewApi = ReviewControllerApi();
+  List<Review> _userReviews = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserReviews();
+  }
+
+  Future<void> _fetchUserReviews() async {
+    try {
+      final reviews =
+          await _reviewApi
+              .listAll(); // Substitua por endpoint do usuário, se disponível
+      setState(() {
+        _userReviews = reviews ?? [];
+      });
+    } catch (e) {
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao carregar reviews do usuário: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,27 +78,14 @@ class ProfilePage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: mockUserReviews.length,
-              itemBuilder: (context, index) {
-                final review = mockUserReviews[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      review['review']!,
-                      style: const TextStyle(color: AppColors.darkText),
-                    ),
-                  ),
-                );
-              },
-            ),
+            ..._userReviews.map((review) {
+              return ReviewCard(
+                user: 'Usuário Fixo', // Nome fixo
+                review: review.content ?? '',
+                stars: review.rating ?? 0,
+                avatarUrl: 'https://i.pravatar.cc/150?img=5', // Avatar fixo
+              );
+            }).toList(),
           ],
         ),
       ),

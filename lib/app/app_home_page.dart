@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:reviewer_mobile/openapi/lib/api.dart';
 import 'package:reviewer_mobile/shared/widgets/custom_bottom_app_bar.dart';
 import 'package:reviewer_mobile/shared/widgets/review_card.dart';
 import 'package:reviewer_mobile/theme/app_colors.dart';
@@ -6,13 +7,40 @@ import 'package:routefly/routefly.dart';
 
 import '../main.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
-  final List<Map<String, dynamic>> mockReviews = const [
-    {'user': 'João', 'review': 'Achei esse livro maravilhoso!', 'stars': 5},
-    {'user': 'Maria', 'review': 'O filme foi meio fraco...', 'stars': 2},
-  ];
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final _reviewApi = ReviewControllerApi();
+  List<Review> _reviews = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchReviews();
+  }
+
+  Future<void> _fetchReviews() async {
+    try {
+      final reviews = await _reviewApi.listAll();
+      setState(() {
+        _reviews = reviews ?? [];
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao carregar reviews: $e')));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,15 +72,14 @@ class HomePage extends StatelessWidget {
         ),
       ),
       body: ListView.builder(
-        // Utilizando ReviewCard com Mock
-        itemCount: mockReviews.length,
+        itemCount: _reviews.length,
         itemBuilder: (context, index) {
-          final review = mockReviews[index];
+          final review = _reviews[index];
           return ReviewCard(
-            user: review['user'] ?? 'Anônimo',
-            review: review['review']!,
-            stars: review['stars'] ?? 0,
-            avatarUrl: null,
+            user: 'Usuário Fixo', // Nome fixo
+            review: review.content ?? '',
+            stars: review.rating ?? 0,
+            avatarUrl: 'https://i.pravatar.cc/150?img=5', // Avatar fixo
           );
         },
       ),
