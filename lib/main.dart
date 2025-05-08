@@ -1,25 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:routefly/routefly.dart';
-import 'main.route.dart'; // GERADO automaticamente depois
+import 'package:reviewer_mobile/services/auth_service.dart';
+import 'main.route.dart';
+import 'package:reviewer_mobile/theme/theme.dart';
 
-part 'main.g.dart'; // Define o arquivo gerado
+part 'main.g.dart';
 
-void main() {
-  runApp(const ReviewSocialApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final authService = AuthService();
+  await authService.init();
+
+  runApp(ReviewSocialApp(authService: authService));
 }
 
 @Main()
 class ReviewSocialApp extends StatelessWidget {
-  const ReviewSocialApp({super.key});
+  final AuthService authService;
+
+  const ReviewSocialApp({super.key, required this.authService});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      routerConfig: Routefly.routerConfig(
-        routes: routes, // Rota gerada automaticamente
-        initialPath: routePaths.appHome,
-      ),
-      debugShowCheckedModeBanner: false,
+    return ValueListenableBuilder<bool>(
+      valueListenable: authService.isAuthenticated,
+      builder: (context, isAuthenticated, _) {
+        return MaterialApp.router(
+          theme: appTheme,
+          routerConfig: Routefly.routerConfig(
+            routes: routes,
+            initialPath: routePaths.appHome, // sempre começa do login
+            // middlewares: [
+            //   (routeInfo) {
+            //     final isLoginRoute = routeInfo.location == routePaths.login;
+
+            //     if (!isAuthenticated && !isLoginRoute) {
+            //       return RouteInformation(location: routePaths.login);
+            //     } else if (isAuthenticated && isLoginRoute) {
+            //       return RouteInformation(location: routePaths.appHome);
+            //     }
+            //     return routeInfo;
+            //   },
+            // ],
+            notFoundPath: '404',
+          ),
+          debugShowCheckedModeBanner: false,
+        );
+      },
     );
   }
 }

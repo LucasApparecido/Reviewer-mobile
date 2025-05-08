@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:reviewer_mobile/openapi/lib/api.dart';
-import 'package:reviewer_mobile/theme/app_colors.dart'; // Importando as cores
+import 'package:reviewer_mobile/services/review_service.dart';
+import 'package:reviewer_mobile/theme/app_colors.dart';
 import 'package:routefly/routefly.dart';
 
 class CreateReviewPage extends StatefulWidget {
@@ -14,17 +14,19 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
   final _formKey = GlobalKey<FormState>();
   final _reviewController = TextEditingController();
   int _stars = 0;
+  final ReviewService _reviewService = ReviewService();
 
   Future<void> _submitReview() async {
     if (_formKey.currentState!.validate()) {
-      final api = ReviewControllerApi();
-      final createReviewDto = CreateReviewDTO(
-        content: _reviewController.text,
-        rating: _stars,
-      );
-
       try {
-        await api.create(createReviewDto);
+        final reviewData = {
+          'title': 'Nova Review',
+          'content': _reviewController.text,
+          'rating': _stars,
+        };
+
+        await _reviewService.createReviewAsJson(reviewData);
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Review criada com sucesso!')),
         );
@@ -35,6 +37,12 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
         ).showSnackBar(SnackBar(content: Text('Erro ao criar review: $e')));
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _reviewController.dispose();
+    super.dispose();
   }
 
   @override
@@ -58,7 +66,7 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
             children: [
               TextFormField(
                 controller: _reviewController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Escreva sua review',
                   labelStyle: TextStyle(color: AppColors.mediumText),
                   enabledBorder: UnderlineInputBorder(
@@ -67,8 +75,11 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
                   focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: AppColors.mediumText),
                   ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                style: const TextStyle(color: AppColors.darkText),
+                style: const TextStyle(color: AppColors.darkText, fontSize: 18),
                 validator:
                     (value) =>
                         value == null || value.isEmpty
@@ -106,7 +117,7 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
                     foregroundColor: Colors.white,
                   ),
                   onPressed: _submitReview,
-                  child: const Text('Publicar'),
+                  child: const Text('Publicar', style: TextStyle(fontSize: 18)),
                 ),
               ),
             ],

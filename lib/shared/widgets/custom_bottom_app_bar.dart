@@ -10,7 +10,7 @@ class CustomBottomAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
-      color: AppColors.lightGray,
+      color: AppColors.secondary,
       shape: const CircularNotchedRectangle(),
       notchMargin: 6,
       child: SizedBox(

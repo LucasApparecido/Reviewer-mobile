@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Fundo da aplicação
-  static const Color background = Color(0xFFFAF3E0);
+  // Fundo
+  static const Color background = Color(0xFFFDFCFD); // branco levemente quente
+  static const Color surface = Color(0xFFFFFFFF);
 
   // Textos
-  static const Color darkText = Color(0xFF222222);     // Texto principal
-  static const Color mediumText = Color(0xFF555555);   // Texto secundário
+  static const Color darkText = Color(0xFF1C1B1F);
+  static const Color mediumText = Color(0xFF4A4A4A);
 
-  // Bordas e separadores
-  static const Color lightGray = Color(0xFFDDDDDD);
-
-  // Estrelas
-  static const Color stars = Color(0xFFFFC107);
+  // Cores de Ação
+  static const Color primary = Color(0xFF4C4CFF); // azul elegante
+  static const Color primaryDark = Color(0xFF1F1FFF);
+  static const Color secondary = Color(0xFF6C63FF); // roxo claro
 
   // Destaques
-  static const Color highlight = Color(0xFFFF4C4C);
+  static const Color highlight = primary;
 
-  // Moedas (recompensas etc.)
+  // Elementos
+  static const Color border = Color(0xFFE0E0E0);
+  static const Color stars = Color(0xFFFFC107);
   static const Color coin = Color(0xFFFFD700);
 
-  // Erros - mudar essa cor coloquei qualquer coisa
-  static const Color error = Color(0xFFFF0000);
+  // Erro
+  static const Color error = Color(0xFFD32F2F);
 }

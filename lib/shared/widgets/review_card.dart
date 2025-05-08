@@ -4,7 +4,7 @@ import 'package:reviewer_mobile/theme/app_colors.dart';
 class ReviewCard extends StatelessWidget {
   final String user;
   final String review;
-  final int stars;
+  final int rating;
   final String? avatarUrl;
   final bool showActions;
   final VoidCallback? onEdit;
@@ -14,33 +14,42 @@ class ReviewCard extends StatelessWidget {
     super.key,
     required this.user,
     required this.review,
-    required this.stars,
+    required this.rating,
     this.avatarUrl,
-
     this.showActions = false,
     this.onEdit,
     this.onDelete,
-  }) : super(key: key);
+  });
 
   void _showMenu(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: AppColors.background,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       builder:
           (_) => SafeArea(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.edit),
-                  title: const Text('Editar'),
+                  leading: const Icon(Icons.edit, color: AppColors.mediumText),
+                  title: const Text(
+                    'Editar',
+                    style: TextStyle(color: AppColors.darkText),
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     if (onEdit != null) onEdit!();
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.delete),
-                  title: const Text('Excluir'),
+                  leading: const Icon(Icons.delete, color: AppColors.error),
+                  title: const Text(
+                    'Excluir',
+                    style: TextStyle(color: AppColors.darkText),
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     if (onDelete != null) onDelete!();
@@ -56,14 +65,15 @@ class ReviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 1,
+      elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // TOPO: avatar + nome + botão de ações
+            // TOPO
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -73,11 +83,11 @@ class ReviewCard extends StatelessWidget {
                       radius: 20,
                       backgroundImage:
                           avatarUrl != null ? NetworkImage(avatarUrl!) : null,
+                      backgroundColor: AppColors.mediumText,
                       child:
                           avatarUrl == null
                               ? const Icon(Icons.person, color: Colors.white)
                               : null,
-                      backgroundColor: AppColors.mediumText,
                     ),
                     const SizedBox(width: 12),
                     Text(
@@ -92,7 +102,10 @@ class ReviewCard extends StatelessWidget {
                 ),
                 if (showActions)
                   IconButton(
-                    icon: const Icon(Icons.more_vert),
+                    icon: const Icon(
+                      Icons.more_vert,
+                      color: AppColors.mediumText,
+                    ),
                     onPressed: () => _showMenu(context),
                   ),
               ],
@@ -106,7 +119,7 @@ class ReviewCard extends StatelessWidget {
             Row(
               children: List.generate(5, (i) {
                 return Icon(
-                  i < stars ? Icons.star : Icons.star_border,
+                  i < rating ? Icons.star : Icons.star_border,
                   size: 20,
                   color: AppColors.stars,
                 );
@@ -118,16 +131,10 @@ class ReviewCard extends StatelessWidget {
               children: [
                 IconButton(
                   onPressed: () {
-                    // moeda futura
+                    // ação monetária futura
                   },
-                  icon: const Icon(Icons.monetization_on, size: 18),
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    padding: const EdgeInsets.all(12),
-                  ),
+                  icon: const Icon(Icons.monetization_on, size: 20),
+                  color: AppColors.coin,
                 ),
                 ElevatedButton.icon(
                   onPressed: () {

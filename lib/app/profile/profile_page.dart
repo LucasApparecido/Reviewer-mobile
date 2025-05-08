@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:reviewer_mobile/openapi/lib/api.dart';
+import 'package:reviewer_mobile/main.dart';
+import 'package:reviewer_mobile/services/review_service.dart';
 import 'package:reviewer_mobile/shared/widgets/custom_bottom_app_bar.dart';
 import 'package:reviewer_mobile/shared/widgets/review_card.dart';
 import 'package:reviewer_mobile/theme/app_colors.dart';
 import 'package:routefly/routefly.dart';
-import 'package:reviewer_mobile/shared/widgets/review_card.dart';
-
-import '../../main.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -16,8 +14,8 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final _reviewApi = ReviewControllerApi();
-  List<Review> _userReviews = [];
+  final ReviewService _reviewService = ReviewService();
+  List<dynamic> _userReviews = [];
 
   @override
   void initState() {
@@ -27,17 +25,30 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _fetchUserReviews() async {
     try {
-      final reviews =
-          await _reviewApi
-              .listAll(); // Substitua por endpoint do usuário, se disponível
+      final response = await _reviewService.listReviews(page: 0, size: 10);
       setState(() {
-        _userReviews = reviews ?? [];
+        _userReviews = response.data['content'] ?? [];
       });
     } catch (e) {
-      setState(() {});
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro ao carregar reviews do usuário: $e')),
       );
+    }
+  }
+
+  Future<void> _deleteReview(int id, int index) async {
+    try {
+      await _reviewService.deleteReview(id);
+      setState(() {
+        _userReviews.removeAt(index);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Review excluída com sucesso!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao excluir review: $e')));
     }
   }
 
@@ -46,19 +57,20 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.mediumText,
-        title: const Text('Perfil', style: TextStyle(color: Colors.white)),
+        backgroundColor: AppColors.primary,
+        title: const Text(
+          'Perfil',
+          style: TextStyle(fontSize: 22, color: Colors.white),
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
             const SizedBox(height: 16),
-            CircleAvatar(
+            const CircleAvatar(
               radius: 40,
-              backgroundImage: NetworkImage(
-                'https://i.pravatar.cc/150?img=09', // Foto Mock - depois troca pela foto real
-              ),
+              backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=09'),
             ),
             const SizedBox(height: 12),
             const Text(
@@ -79,14 +91,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ],
             ),
             const SizedBox(height: 20),
-            ..._userReviews.map((review) {
-              return ReviewCard(
-                user: 'Usuário Fixo', // Nome fixo
-                review: review.content ?? '',
-                stars: review.rating ?? 0,
-                avatarUrl: 'https://i.pravatar.cc/150?img=5', // Avatar fixo
-              );
-            }).toList(),
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -94,12 +98,20 @@ class _ProfilePageState extends State<ProfilePage> {
               itemBuilder: (context, index) {
                 final review = _userReviews[index];
                 return ReviewCard(
-                  user: 'Killua Zoldyk', // Nome fixo ou dinâmico, se disponível
-                  review: review.content ?? '',
-                  stars: review.rating ?? 0,
+                  user: review['user']?['name'] ?? 'Usuário',
+                  review: review['content'] ?? '',
+                  rating: 4, // ajuste se backend fornecer nota
                   showActions: true,
+                  avatarUrl: 'https://i.pravatar.cc/150?img=5',
                   onEdit: () {
-                    Routefly.push(routePaths.review.editReview);
+                    Routefly.push(
+                      routePaths.review.editReview,
+                      arguments: {
+                        'reviewId': review['id'],
+                        'initialReview': review['content'],
+                        'initialStars': 4, // ajuste se tiver rating real
+                      },
+                    );
                   },
                   onDelete: () {
                     showDialog(
@@ -118,30 +130,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               TextButton(
                                 onPressed: () async {
                                   Navigator.pop(context);
-                                  try {
-                                    // Chama a API para excluir o review
-                                    await _reviewApi.delete(review.id!);
-                                    setState(() {
-                                      _userReviews.removeAt(
-                                        index,
-                                      ); // Remove da lista local
-                                    });
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Review excluído com sucesso!',
-                                        ),
-                                      ),
-                                    );
-                                  } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'Erro ao excluir review: $e',
-                                        ),
-                                      ),
-                                    );
-                                  }
+                                  await _deleteReview(review['id'], index);
                                 },
                                 child: const Text('Excluir'),
                               ),
@@ -177,9 +166,7 @@ class _ProfilePageState extends State<ProfilePage> {
             borderRadius: BorderRadius.circular(20),
           ),
         ),
-        onPressed: () {
-          // Exemplo de ação nos botões
-        },
+        onPressed: () {},
         child: Text(text, style: const TextStyle(color: AppColors.mediumText)),
       ),
     );

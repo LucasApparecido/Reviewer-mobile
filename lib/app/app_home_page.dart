@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:reviewer_mobile/openapi/lib/api.dart';
+import 'package:reviewer_mobile/main.dart';
+import 'package:reviewer_mobile/services/review_service.dart';
 import 'package:reviewer_mobile/shared/widgets/custom_bottom_app_bar.dart';
 import 'package:reviewer_mobile/shared/widgets/review_card.dart';
 import 'package:reviewer_mobile/theme/app_colors.dart';
 import 'package:routefly/routefly.dart';
-
-import '../main.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,8 +14,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _reviewApi = ReviewControllerApi();
-  List<Review> _reviews = [];
+  final ReviewService _reviewService = ReviewService();
+  List<dynamic> _reviews = [];
   bool _isLoading = true;
 
   @override
@@ -26,10 +25,16 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _fetchReviews() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
-      final reviews = await _reviewApi.listAll();
+      final response = await _reviewService.listReviews(page: 0, size: 10);
+      final data = response.data;
+
       setState(() {
-        _reviews = reviews ?? [];
+        _reviews = data['content'] ?? [];
         _isLoading = false;
       });
     } catch (e) {
@@ -50,11 +55,11 @@ class _HomePageState extends State<HomePage> {
         preferredSize: const Size.fromHeight(70),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          color: AppColors.lightGray,
+          color: AppColors.mediumText,
           child: Row(
             children: [
               const CircleAvatar(
-                backgroundColor: AppColors.error,
+                backgroundColor: AppColors.primaryDark,
                 radius: 25,
                 child: Icon(Icons.person, color: Colors.white),
               ),
@@ -71,19 +76,22 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      body: ListView.builder(
-        itemCount: _reviews.length,
-        itemBuilder: (context, index) {
-          final review = _reviews[index];
-          return ReviewCard(
-            user: 'Usuário Fixo', // Nome fixo
-            review: review.content ?? '',
-            stars: review.rating ?? 0,
-            avatarUrl: 'https://i.pravatar.cc/150?img=5', // Avatar fixo
-          );
-        },
-      ),
-      bottomNavigationBar: const CustomBottomAppBar(), // Usando o componente
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : ListView.builder(
+                itemCount: _reviews.length,
+                itemBuilder: (context, index) {
+                  final review = _reviews[index];
+                  return ReviewCard(
+                    user: review['user']?['name'] ?? 'Anônimo',
+                    review: review['content'] ?? '',
+                    rating: review['rating'] ?? 0,
+                    avatarUrl: 'https://i.pravatar.cc/150?img=${index + 1}',
+                  );
+                },
+              ),
+      bottomNavigationBar: const CustomBottomAppBar(),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.highlight,
         child: const Icon(Icons.add, color: Colors.white),
