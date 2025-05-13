@@ -1,33 +1,83 @@
 import 'package:flutter/material.dart';
+import 'package:reviewer_mobile/main.dart';
+import 'package:reviewer_mobile/services/review_service.dart';
 import 'package:reviewer_mobile/shared/widgets/custom_bottom_app_bar.dart';
+import 'package:reviewer_mobile/shared/widgets/review_card.dart';
 import 'package:reviewer_mobile/theme/app_colors.dart';
 import 'package:routefly/routefly.dart';
-import 'package:reviewer_mobile/shared/widgets/review_card.dart';
 
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
 
-import '../../main.dart';
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
 
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+class _ProfilePageState extends State<ProfilePage> {
+  final ReviewService _reviewService = ReviewService();
+  List<dynamic> _userReviews = [];
 
-  final List<Map<String, dynamic>> mockUserReviews = const [
-    {
-      'review': 'Review incrível do livro XYZ!',
-    },
-    {
-      'review': 'Review sobre o novo filme de ação!',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserReviews();
+  }
+
+  Future<void> _fetchUserReviews() async {
+    try {
+      final response = await _reviewService.listReviews(page: 0, size: 10);
+      final List<dynamic> data = response.data['content'] ?? [];
+
+      setState(() {
+        _userReviews =
+            data
+                .map(
+                  (review) => {
+                    'id': review['id'],
+                    'title': review['title'],
+                    'content': review['content'],
+                    'publicationDate': review['publicationDate'],
+                    'images': review['images'],
+                  },
+                )
+                .toList();
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao carregar reviews do usuário: $e')),
+      );
+    }
+  }
+
+  Future<void> _onRefresh() async {
+    await _fetchUserReviews();
+  }
+
+  Future<void> _deleteReview(int id, int index) async {
+    try {
+      await _reviewService.deleteReview(id);
+      setState(() {
+        _userReviews.removeAt(index);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Review excluída com sucesso!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao excluir review: $e')));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.mediumText,
+        backgroundColor: AppColors.primary,
         title: const Text(
           'Perfil',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(fontSize: 22, color: Colors.white),
         ),
         centerTitle: true,
       ),
@@ -35,11 +85,9 @@ class ProfilePage extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 16),
-            CircleAvatar(
+            const CircleAvatar(
               radius: 40,
-              backgroundImage: NetworkImage(
-                'https://i.pravatar.cc/150?img=09', // Foto Mock - depois troca pela foto real
-              ),
+              backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=09'),
             ),
             const SizedBox(height: 12),
             const Text(
@@ -63,42 +111,57 @@ class ProfilePage extends StatelessWidget {
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: mockUserReviews.length,
+              itemCount: _userReviews.length,
               itemBuilder: (context, index) {
-                final review = mockUserReviews[index];
+                final review = _userReviews[index];
                 return ReviewCard(
-                  user: 'Killua Zoldyk',
-                  review: review['review']!,
-                  stars: 5, // ou alguma nota mockada por enquanto
+                  user: 'Usuário',
+                  review: review['content'] ?? '',
+                  rating: 5,
+                  avatarUrl: 'https://i.pravatar.cc/150?img=5',
                   showActions: true,
-                  onEdit: () {
-                    Routefly.push(routePaths.review.editReview);                  },
+                  onEdit: () async {
+                    final result = await Routefly.push(
+                      routePaths.review.editReview,
+                      arguments: {
+                        'reviewId': review['id'],
+                        'initialReview': review['content'],
+                        'initialStars': 0,
+                      },
+                    );
+
+                    if (result == true) {
+                      _fetchUserReviews();
+                    }
+                  },
                   onDelete: () {
                     showDialog(
                       context: context,
-                      builder: (_) => AlertDialog(
-                        title: const Text('Excluir Review'),
-                        content: const Text('Deseja realmente excluir esta review?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Cancelar'),
+                      builder:
+                          (_) => AlertDialog(
+                            title: const Text('Excluir Review'),
+                            content: const Text(
+                              'Deseja realmente excluir esta review?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Cancelar'),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  Navigator.pop(context);
+                                  await _deleteReview(review['id'], index);
+                                },
+                                child: const Text('Excluir'),
+                              ),
+                            ],
                           ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              // aqui remove da lista ou chama API
-                            },
-                            child: const Text('Excluir'),
-                          ),
-                        ],
-                      ),
                     );
                   },
                 );
               },
             ),
-
           ],
         ),
       ),
@@ -106,8 +169,12 @@ class ProfilePage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.highlight,
         child: const Icon(Icons.add, color: Colors.white),
-        onPressed: () {
-          Routefly.push(routePaths.review.createReview);
+        onPressed: () async {
+          final result = await Routefly.push(routePaths.review.createReview);
+
+          if (result == true) {
+            _onRefresh();
+          }
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -124,13 +191,8 @@ class ProfilePage extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
         ),
-        onPressed: () {
-          // Exemplo de ação nos botões
-        },
-        child: Text(
-          text,
-          style: const TextStyle(color: AppColors.mediumText),
-        ),
+        onPressed: () {},
+        child: Text(text, style: const TextStyle(color: AppColors.mediumText)),
       ),
     );
   }

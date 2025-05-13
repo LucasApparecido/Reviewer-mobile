@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:reviewer_mobile/theme/app_colors.dart'; // Importando as cores
+import 'package:reviewer_mobile/services/review_service.dart';
+import 'package:reviewer_mobile/theme/app_colors.dart';
 import 'package:routefly/routefly.dart';
 
 class CreateReviewPage extends StatefulWidget {
-  const CreateReviewPage({Key? key}) : super(key: key);
+  const CreateReviewPage({super.key});
 
   @override
   State<CreateReviewPage> createState() => _CreateReviewPageState();
@@ -13,14 +14,35 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
   final _formKey = GlobalKey<FormState>();
   final _reviewController = TextEditingController();
   int _stars = 0;
+  final ReviewService _reviewService = ReviewService();
 
-  void _submitReview() {
+  Future<void> _submitReview() async {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Review criada com sucesso!')),
-      );
-      Routefly.pop(context);
+      try {
+        final reviewData = {
+          'title': 'Nova Review',
+          'content': _reviewController.text,
+        };
+
+        await _reviewService.createReviewAsJson(reviewData);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Review criada com sucesso!')),
+        );
+
+        Navigator.pop(context, true);
+      } catch (e) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao criar review: $e')));
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    _reviewController.dispose();
+    super.dispose();
   }
 
   @override
@@ -28,10 +50,10 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.mediumText,
+        backgroundColor: AppColors.primary,
         title: const Text(
           'Criar Review',
-          style: TextStyle(color: AppColors.darkText),
+          style: TextStyle(color: AppColors.background),
         ),
         iconTheme: const IconThemeData(color: AppColors.darkText),
       ),
@@ -44,7 +66,7 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
             children: [
               TextFormField(
                 controller: _reviewController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Escreva sua review',
                   labelStyle: TextStyle(color: AppColors.mediumText),
                   enabledBorder: UnderlineInputBorder(
@@ -53,32 +75,39 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
                   focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: AppColors.mediumText),
                   ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                style: const TextStyle(color: AppColors.darkText),
-                validator: (value) => value == null || value.isEmpty ? 'Campo obrigatório' : null,
+                style: const TextStyle(color: AppColors.darkText, fontSize: 18),
+                validator:
+                    (value) =>
+                        value == null || value.isEmpty
+                            ? 'Campo obrigatório'
+                            : null,
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Nota:',
-                style: TextStyle(color: AppColors.darkText, fontSize: 16),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(5, (index) {
-                  return IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _stars = index + 1;
-                      });
-                    },
-                    icon: Icon(
-                      index < _stars ? Icons.star : Icons.star_border,
-                      color: AppColors.stars,
-                      size: 32,
-                    ),
-                  );
-                }),
-              ),
+              // const Text(
+              //   'Nota:',
+              //   style: TextStyle(color: AppColors.darkText, fontSize: 16),
+              // ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: List.generate(5, (index) {
+              //     return IconButton(
+              //       onPressed: () {
+              //         setState(() {
+              //           _stars = index + 1;
+              //         });
+              //       },
+              //       icon: Icon(
+              //         index < _stars ? Icons.star : Icons.star_border,
+              //         color: AppColors.stars,
+              //         size: 32,
+              //       ),
+              //     );
+              //   }),
+              // ),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
@@ -88,7 +117,7 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
                     foregroundColor: Colors.white,
                   ),
                   onPressed: _submitReview,
-                  child: const Text('Publicar'),
+                  child: const Text('Publicar', style: TextStyle(fontSize: 18)),
                 ),
               ),
             ],
