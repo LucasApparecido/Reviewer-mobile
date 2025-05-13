@@ -161,8 +161,12 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.highlight,
         child: const Icon(Icons.add, color: Colors.white),
-        onPressed: () {
-          Routefly.push(routePaths.review.createReview);
+        onPressed: () async {
+          final result = await Routefly.push(routePaths.review.createReview);
+
+          if (result == true) {
+            _onRefresh();
+          }
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

@@ -50,7 +50,9 @@ class _EditReviewPageState extends State<EditReviewPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Review atualizada com sucesso!')),
         );
-        Routefly.pop(context);
+
+        // Retorna um valor indicando que a review foi editada
+        Navigator.pop(context, true);
       } catch (e) {
         ScaffoldMessenger.of(
           context,

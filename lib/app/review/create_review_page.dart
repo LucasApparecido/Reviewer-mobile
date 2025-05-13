@@ -22,7 +22,6 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
         final reviewData = {
           'title': 'Nova Review',
           'content': _reviewController.text,
-          // 'rating': _stars,
         };
 
         await _reviewService.createReviewAsJson(reviewData);
@@ -30,7 +29,8 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Review criada com sucesso!')),
         );
-        Routefly.pop(context);
+
+        Navigator.pop(context, true);
       } catch (e) {
         ScaffoldMessenger.of(
           context,

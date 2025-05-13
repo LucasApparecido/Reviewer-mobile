@@ -49,6 +49,10 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  Future<void> _onRefresh() async {
+    await _fetchUserReviews();
+  }
+
   Future<void> _deleteReview(int id, int index) async {
     try {
       await _reviewService.deleteReview(id);
@@ -116,8 +120,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   rating: 5,
                   avatarUrl: 'https://i.pravatar.cc/150?img=5',
                   showActions: true,
-                  onEdit: () {
-                    Routefly.push(
+                  onEdit: () async {
+                    final result = await Routefly.push(
                       routePaths.review.editReview,
                       arguments: {
                         'reviewId': review['id'],
@@ -125,6 +129,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         'initialStars': 0,
                       },
                     );
+
+                    if (result == true) {
+                      _fetchUserReviews();
+                    }
                   },
                   onDelete: () {
                     showDialog(
@@ -161,8 +169,12 @@ class _ProfilePageState extends State<ProfilePage> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.highlight,
         child: const Icon(Icons.add, color: Colors.white),
-        onPressed: () {
-          Routefly.push(routePaths.review.createReview);
+        onPressed: () async {
+          final result = await Routefly.push(routePaths.review.createReview);
+
+          if (result == true) {
+            _onRefresh();
+          }
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
