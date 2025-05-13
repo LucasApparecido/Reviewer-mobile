@@ -15,36 +15,73 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final ReviewService _reviewService = ReviewService();
+  final ScrollController _scrollController = ScrollController();
+
   List<dynamic> _reviews = [];
-  bool _isLoading = true;
+  bool _isLoading = false;
+  bool _hasMore = true;
+  int _page = 0;
+  final int _pageSize = 5;
 
   @override
   void initState() {
     super.initState();
     _fetchReviews();
+    _scrollController.addListener(_onScroll);
   }
 
-  Future<void> _fetchReviews() async {
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200 &&
+        !_isLoading &&
+        _hasMore) {
+      _fetchReviews();
+    }
+  }
+
+  Future<void> _fetchReviews({bool isRefresh = false}) async {
+    if (_isLoading) return;
+
     setState(() {
       _isLoading = true;
     });
 
+    final int nextPage = isRefresh ? 0 : _page;
+
     try {
-      final response = await _reviewService.listReviews(page: 0, size: 10);
-      final data = response.data;
+      final response =
+      await _reviewService.listReviews(page: nextPage, size: _pageSize);
+      final data = response.data['content'] ?? [];
 
       setState(() {
-        _reviews = data['content'] ?? [];
-        _isLoading = false;
+        if (isRefresh) {
+          _reviews = data;
+          _page = 1;
+        } else {
+          _reviews.addAll(data);
+          _page++;
+        }
+        _hasMore = data.length == _pageSize;
       });
     } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao carregar reviews: $e')),
+      );
+    } finally {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Erro ao carregar reviews: $e')));
     }
+  }
+
+  Future<void> _onRefresh() async {
+    await _fetchReviews(isRefresh: true);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -57,14 +94,14 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           color: AppColors.mediumText,
           child: Row(
-            children: [
-              const CircleAvatar(
+            children: const [
+              CircleAvatar(
                 backgroundColor: AppColors.primaryDark,
                 radius: 25,
                 child: Icon(Icons.person, color: Colors.white),
               ),
-              const SizedBox(width: 16),
-              const Text(
+              SizedBox(width: 16),
+              Text(
                 'Reviews',
                 style: TextStyle(
                   fontSize: 24,
@@ -76,21 +113,45 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      body:
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : ListView.builder(
-                itemCount: _reviews.length,
-                itemBuilder: (context, index) {
-                  final review = _reviews[index];
-                  return ReviewCard(
-                    user: review['user']?['name'] ?? 'Anônimo',
-                    review: review['content'] ?? '',
-                    rating: review['rating'] ?? 0,
-                    avatarUrl: 'https://i.pravatar.cc/150?img=${index + 1}',
-                  );
-                },
-              ),
+      body: RefreshIndicator(
+        onRefresh: _onRefresh,
+        child: ListView.builder(
+          controller: _scrollController,
+          itemCount: _reviews.length + 1,
+          itemBuilder: (context, index) {
+            if (index < _reviews.length) {
+              final review = _reviews[index];
+              return ReviewCard(
+                user: review['user']?['name'] ?? 'Anônimo',
+                review: review['content'] ?? '',
+                rating: review['rating'] ?? 0,
+                avatarUrl: 'https://i.pravatar.cc/150?img=${index + 1}',
+              );
+            } else if (_isLoading) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            } else if (!_hasMore) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: Text(
+                    'Você chegou ao fim da internet... pelo menos por aqui! 😅',
+                    style: TextStyle(
+                      color: AppColors.darkText,
+                      fontSize: 16,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              );
+            } else {
+              return const SizedBox.shrink();
+            }
+          },
+        ),
+      ),
       bottomNavigationBar: const CustomBottomAppBar(),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.highlight,

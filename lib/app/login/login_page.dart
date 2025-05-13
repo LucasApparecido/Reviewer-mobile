@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:reviewer_mobile/main.dart';
-import 'package:reviewer_mobile/services/auth_service.dart';
+//TODO: remover depois
+import 'package:reviewer_mobile/services/auth_service_teste.dart';
+
 import 'package:reviewer_mobile/services/dio_service.dart';
 import 'package:reviewer_mobile/theme/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,18 +36,27 @@ class _LoginPageState extends State<LoginPage> {
       });
 
       try {
-        _authService.login(_emailController.text, _senhaController.text).then((
-          value,
-        ) {
-          Routefly.navigate(routePaths.review.createReview);
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(' caaerto')));
-        });
+        final loginResult = await _authService.login(
+          _emailController.text,
+          _senhaController.text,
+        );
+
+        if (loginResult) {
+          // Navegação após sucesso
+          Routefly.navigate(routePaths.appHome);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Login realizado com sucesso')),
+          );
+        } else {
+          // Falha no login
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Usuário ou senha incorretos')),
+          );
+        }
       } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro ao fazer login: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao fazer login: $e')),
+        );
       } finally {
         if (mounted) {
           setState(() {
@@ -55,6 +66,7 @@ class _LoginPageState extends State<LoginPage> {
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

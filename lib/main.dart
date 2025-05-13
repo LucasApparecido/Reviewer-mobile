@@ -30,19 +30,7 @@ class ReviewSocialApp extends StatelessWidget {
           theme: appTheme,
           routerConfig: Routefly.routerConfig(
             routes: routes,
-            initialPath: routePaths.appHome, // sempre começa do login
-            // middlewares: [
-            //   (routeInfo) {
-            //     final isLoginRoute = routeInfo.location == routePaths.login;
-
-            //     if (!isAuthenticated && !isLoginRoute) {
-            //       return RouteInformation(location: routePaths.login);
-            //     } else if (isAuthenticated && isLoginRoute) {
-            //       return RouteInformation(location: routePaths.appHome);
-            //     }
-            //     return routeInfo;
-            //   },
-            // ],
+            initialPath: routePaths.login,
             notFoundPath: '404',
           ),
           debugShowCheckedModeBanner: false,
