@@ -11,10 +11,7 @@ class ReviewService {
   }
 
   Future<Response> listReviews({int page = 0, int size = 10}) {
-    return _dio.get(
-      '/review',
-      queryParameters: {'pageable.page': page, 'pageable.size': size},
-    );
+    return _dio.get('/review', queryParameters: {'page': page, 'size': size});
   }
 
   Future<Response> createReviewAsJson(Map<String, dynamic> reviewData) {

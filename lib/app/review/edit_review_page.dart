@@ -98,23 +98,23 @@ class _EditReviewPageState extends State<EditReviewPage> {
                             : null,
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Nota:',
-                style: TextStyle(color: AppColors.darkText, fontSize: 16),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(5, (index) {
-                  return IconButton(
-                    onPressed: () => setState(() => _stars = index + 1),
-                    icon: Icon(
-                      index < _stars ? Icons.star : Icons.star_border,
-                      color: AppColors.stars,
-                      size: 32,
-                    ),
-                  );
-                }),
-              ),
+              // const Text(
+              //   'Nota:',
+              //   style: TextStyle(color: AppColors.darkText, fontSize: 16),
+              // ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: List.generate(5, (index) {
+              //     return IconButton(
+              //       onPressed: () => setState(() => _stars = index + 1),
+              //       icon: Icon(
+              //         index < _stars ? Icons.star : Icons.star_border,
+              //         color: AppColors.stars,
+              //         size: 32,
+              //       ),
+              //     );
+              //   }),
+              // ),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,

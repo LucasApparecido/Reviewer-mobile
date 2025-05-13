@@ -32,7 +32,7 @@ class _HomePageState extends State<HomePage> {
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200 &&
+            _scrollController.position.maxScrollExtent - 200 &&
         !_isLoading &&
         _hasMore) {
       _fetchReviews();
@@ -49,9 +49,13 @@ class _HomePageState extends State<HomePage> {
     final int nextPage = isRefresh ? 0 : _page;
 
     try {
-      final response =
-      await _reviewService.listReviews(page: nextPage, size: _pageSize);
-      final data = response.data['content'] ?? [];
+      final response = await _reviewService.listReviews(
+        page: nextPage,
+        size: _pageSize,
+      );
+
+      final List<dynamic> data = response.data['content'] ?? [];
+      final bool isLastPage = response.data['last'] ?? true;
 
       setState(() {
         if (isRefresh) {
@@ -61,12 +65,13 @@ class _HomePageState extends State<HomePage> {
           _reviews.addAll(data);
           _page++;
         }
-        _hasMore = data.length == _pageSize;
+        _hasMore = !isLastPage;
       });
+      print('Reviews recebidos: ${response.data}');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao carregar reviews: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao carregar reviews: $e')));
     } finally {
       setState(() {
         _isLoading = false;
@@ -92,7 +97,7 @@ class _HomePageState extends State<HomePage> {
         preferredSize: const Size.fromHeight(70),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          color: AppColors.mediumText,
+          color: AppColors.primary,
           child: Row(
             children: const [
               CircleAvatar(
@@ -106,7 +111,7 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.darkText,
+                  color: AppColors.background,
                 ),
               ),
             ],
@@ -122,9 +127,9 @@ class _HomePageState extends State<HomePage> {
             if (index < _reviews.length) {
               final review = _reviews[index];
               return ReviewCard(
-                user: review['user']?['name'] ?? 'Anônimo',
-                review: review['content'] ?? '',
-                rating: review['rating'] ?? 0,
+                user: 'Usuário',
+                review: review['content'] ?? 'Sem conteúdo',
+                rating: 5,
                 avatarUrl: 'https://i.pravatar.cc/150?img=${index + 1}',
               );
             } else if (_isLoading) {
@@ -137,7 +142,7 @@ class _HomePageState extends State<HomePage> {
                 padding: EdgeInsets.symmetric(vertical: 24),
                 child: Center(
                   child: Text(
-                    'Você chegou ao fim da internet... pelo menos por aqui! 😅',
+                    'Você chegou ao fim da lista!',
                     style: TextStyle(
                       color: AppColors.darkText,
                       fontSize: 16,

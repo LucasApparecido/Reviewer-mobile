@@ -26,8 +26,21 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _fetchUserReviews() async {
     try {
       final response = await _reviewService.listReviews(page: 0, size: 10);
+      final List<dynamic> data = response.data['content'] ?? [];
+
       setState(() {
-        _userReviews = response.data['content'] ?? [];
+        _userReviews =
+            data
+                .map(
+                  (review) => {
+                    'id': review['id'],
+                    'title': review['title'],
+                    'content': review['content'],
+                    'publicationDate': review['publicationDate'],
+                    'images': review['images'],
+                  },
+                )
+                .toList();
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -98,18 +111,18 @@ class _ProfilePageState extends State<ProfilePage> {
               itemBuilder: (context, index) {
                 final review = _userReviews[index];
                 return ReviewCard(
-                  user: review['user']?['name'] ?? 'Usuário',
+                  user: 'Usuário',
                   review: review['content'] ?? '',
-                  rating: 4, // ajuste se backend fornecer nota
-                  showActions: true,
+                  rating: 5,
                   avatarUrl: 'https://i.pravatar.cc/150?img=5',
+                  showActions: true,
                   onEdit: () {
                     Routefly.push(
                       routePaths.review.editReview,
                       arguments: {
                         'reviewId': review['id'],
                         'initialReview': review['content'],
-                        'initialStars': 4, // ajuste se tiver rating real
+                        'initialStars': 0,
                       },
                     );
                   },

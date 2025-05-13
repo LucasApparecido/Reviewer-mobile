@@ -9,7 +9,7 @@ class DioService {
   DioService._internal() {
     dio = Dio(
       BaseOptions(
-        baseUrl: 'http://10.200.9.122:8081/api/v1',
+        baseUrl: 'http://10.200.9.122:8080/api/v1',
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
       ),

@@ -136,18 +136,20 @@ class ReviewCard extends StatelessWidget {
                   icon: const Icon(Icons.monetization_on, size: 20),
                   color: AppColors.coin,
                 ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // ação de comentar
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.highlight,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                Flexible(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      // ação de comentar
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.highlight,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
+                    icon: const Icon(Icons.comment, size: 18),
+                    label: const Text("Comentar"),
                   ),
-                  icon: const Icon(Icons.comment, size: 18),
-                  label: const Text("Comentar"),
                 ),
               ],
             ),

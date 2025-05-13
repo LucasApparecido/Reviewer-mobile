@@ -22,7 +22,7 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
         final reviewData = {
           'title': 'Nova Review',
           'content': _reviewController.text,
-          'rating': _stars,
+          // 'rating': _stars,
         };
 
         await _reviewService.createReviewAsJson(reviewData);
@@ -50,10 +50,10 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.mediumText,
+        backgroundColor: AppColors.primary,
         title: const Text(
           'Criar Review',
-          style: TextStyle(color: AppColors.darkText),
+          style: TextStyle(color: AppColors.background),
         ),
         iconTheme: const IconThemeData(color: AppColors.darkText),
       ),
@@ -87,27 +87,27 @@ class _CreateReviewPageState extends State<CreateReviewPage> {
                             : null,
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Nota:',
-                style: TextStyle(color: AppColors.darkText, fontSize: 16),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(5, (index) {
-                  return IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _stars = index + 1;
-                      });
-                    },
-                    icon: Icon(
-                      index < _stars ? Icons.star : Icons.star_border,
-                      color: AppColors.stars,
-                      size: 32,
-                    ),
-                  );
-                }),
-              ),
+              // const Text(
+              //   'Nota:',
+              //   style: TextStyle(color: AppColors.darkText, fontSize: 16),
+              // ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: List.generate(5, (index) {
+              //     return IconButton(
+              //       onPressed: () {
+              //         setState(() {
+              //           _stars = index + 1;
+              //         });
+              //       },
+              //       icon: Icon(
+              //         index < _stars ? Icons.star : Icons.star_border,
+              //         color: AppColors.stars,
+              //         size: 32,
+              //       ),
+              //     );
+              //   }),
+              // ),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
