@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:reviewer_mobile/services/review_service.dart';
 import 'package:reviewer_mobile/theme/app_colors.dart';
 import 'package:routefly/routefly.dart';
+
+import '../../core/config_state.dart';
+// Importe BuiltList se você for incluir imagens no ReviewRequestDTO
+// import 'package:built_collection/built_collection.dart';
+// import 'package:reviewerapi/src/model/image_dto.dart'; // Se ReviewRequestDTO precisar de ImageDTO
+
 
 class EditReviewPage extends StatefulWidget {
   const EditReviewPage({Key? key}) : super(key: key);
@@ -13,21 +18,40 @@ class EditReviewPage extends StatefulWidget {
 class _EditReviewPageState extends State<EditReviewPage> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _reviewController;
-  int _stars = 0;
+  // int _stars = 0; // Se você não for usar, pode manter comentado ou remover
   int? _reviewId;
-  final ReviewService _reviewService = ReviewService();
+  late final ReviewService _reviewService;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicialização do ReviewService.
+    // É crucial que AppApi e ConfigState sejam singletons na sua aplicação real.
+    // Para este exemplo, estamos criando instâncias temporárias.
+    final _tempAppApi = AppApi(config: ConfigState()); // Idealmente use DI
+    _reviewService = ReviewService(_tempAppApi);
+    _reviewController = TextEditingController(); // Inicializa aqui, o texto será setado em didChangeDependencies
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final args =
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
-        {};
-    _reviewController = TextEditingController(
-      text: args['initialReview'] ?? '',
-    );
-    _stars = args['initialStars'] ?? 0;
-    _reviewId = args['reviewId'];
+    // Obtém os argumentos apenas uma vez ou quando a rota muda.
+    // Evita recriar o TextEditingController em cada rebuild.
+    if (_reviewController.text.isEmpty && ModalRoute.of(context)?.settings.arguments != null) {
+      final args =
+      ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+      _reviewController.text = args['initialReview'] ?? '';
+      // _stars = args['initialStars'] ?? 0; // Se não usa, pode remover
+      _reviewId = args['reviewId'];
+    }
+  }
+
+  @override
+  void dispose() {
+    _reviewController.dispose();
+    super.dispose();
   }
 
   Future<void> _submitEdit() async {
@@ -38,25 +62,40 @@ class _EditReviewPageState extends State<EditReviewPage> {
         );
         return;
       }
+      if (_isLoading) return;
+
+      setState(() {
+        _isLoading = true;
+      });
 
       try {
-        final reviewData = {
-          'title': 'Review Atualizada',
-          'content': _reviewController.text,
-        };
+        final String title = 'Review Atualizada'; // Título obrigatório para o DTO
+        final String content = _reviewController.text;
 
-        await _reviewService.updateReviewAsJson(_reviewId!, reviewData);
+        await _reviewService.updateReview(_reviewId!, title, content);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Review atualizada com sucesso!')),
-        );
-
-        // Retorna um valor indicando que a review foi editada
-        Navigator.pop(context, true);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Review atualizada com sucesso!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context, true); // Retorna true para indicar sucesso na edição
+        }
       } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro ao atualizar review: $e')));
+        print('Erro ao atualizar review: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(e.toString())));
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
@@ -66,12 +105,12 @@ class _EditReviewPageState extends State<EditReviewPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.mediumText,
+        backgroundColor: AppColors.primary,
         title: const Text(
           'Editar Review',
-          style: TextStyle(color: AppColors.darkText),
+          style: TextStyle(color: Colors.white),
         ),
-        iconTheme: const IconThemeData(color: AppColors.darkText),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -82,24 +121,29 @@ class _EditReviewPageState extends State<EditReviewPage> {
             children: [
               TextFormField(
                 controller: _reviewController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Edite sua review',
                   labelStyle: TextStyle(color: AppColors.mediumText),
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: AppColors.mediumText),
                   ),
                   focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.mediumText),
+                    borderSide: BorderSide(color: AppColors.highlight),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: AppColors.border),
                   ),
                 ),
-                style: const TextStyle(color: AppColors.darkText),
+                style: const TextStyle(color: AppColors.darkText, fontSize: 18),
                 validator:
                     (value) =>
-                        (value == null || value.isEmpty)
-                            ? 'Campo obrigatório'
-                            : null,
+                (value == null || value.isEmpty)
+                    ? 'Campo obrigatório'
+                    : null,
               ),
               const SizedBox(height: 24),
+              // Adicione a seção de notas/estrelas aqui se seu ReviewRequestDTO tiver esse campo.
               // const Text(
               //   'Nota:',
               //   style: TextStyle(color: AppColors.darkText, fontSize: 16),
@@ -125,8 +169,10 @@ class _EditReviewPageState extends State<EditReviewPage> {
                     backgroundColor: AppColors.highlight,
                     foregroundColor: Colors.white,
                   ),
-                  onPressed: _submitEdit,
-                  child: const Text('Salvar Alterações'),
+                  onPressed: _isLoading ? null : _submitEdit,
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('Salvar Alterações'),
                 ),
               ),
             ],
