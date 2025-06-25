@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-// Remova o import de main.dart se não for estritamente necessário para routePaths,
-// ou ajuste para importar apenas routePaths se for o caso.
-// import 'package:reviewer_mobile/main.dart'; // Removido ou ajustado se routePaths vier de outro lugar
 import 'package:reviewer_mobile/theme/app_colors.dart';
+import 'package:routefly/routefly.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:routefly/routefly.dart'; // Para navegação
 
-// IMPORTS DO BACKEND GERADO
-import 'package:reviewerapi/reviewerapi.dart'; // Este deve re-exportar AuthControllerApi, AuthDTO e serializers
+import 'package:reviewerapi/reviewerapi.dart';
 import 'package:dio/dio.dart';
 
-import '../../main.dart'; // Para tratamento de DioException
+import '../../my_app.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -25,12 +21,9 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController(); // Campo 'password' do AuthDTO
   bool _isLoading = false;
 
-  // Instância do Dio com a base URL.
-  // Usamos 10.0.2.2 para emuladores Android para acessar o localhost do seu PC.
-  // Para simulador iOS ou desktop, use 'http://localhost:8080/api/v1'.
   final Dio _dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:8080/api/v1'));
 
-  late final AuthControllerApi _authApi; // Instância do AuthControllerApi gerado
+  late final AuthControllerApi _authApi;
 
   @override
   void initState() {
@@ -48,20 +41,18 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _fazerLogin() async {
     if (_formKey.currentState!.validate()) {
-      if (_isLoading) return; // Evita múltiplas requisições
+      if (_isLoading) return;
 
       setState(() {
         _isLoading = true;
       });
 
       try {
-        // 1. Crie o AuthDTO com os dados do formulário
         final AuthDTO authRequest = AuthDTO((b) => b
           ..login = _emailController.text
           ..password = _passwordController.text,
         );
 
-        // 2. Chama o método de login na API
         final response = await _authApi.login(authDTO: authRequest);
 
         final Map<String, dynamic> responseData = response.data?.asMap?.cast<String, dynamic>() ?? {};
@@ -70,7 +61,6 @@ class _LoginPageState extends State<LoginPage> {
         final String? refreshToken = responseData['refreshToken'];
 
         if (accessToken != null && refreshToken != null) {
-          // 4. Salva os tokens no SharedPreferences
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('accessToken', accessToken);
           await prefs.setString('refreshToken', refreshToken);
@@ -82,7 +72,6 @@ class _LoginPageState extends State<LoginPage> {
                 backgroundColor: Colors.green,
               ),
             );
-            // 5. Navega para a tela principal (appHome)
             Routefly.navigate(routePaths.appHome); // Certifique-se que routePaths.appHome está disponível
           }
         } else {
@@ -162,11 +151,11 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             children: [
               TextFormField(
-                controller: _emailController, // Usando _emailController para o campo de usuário
+                controller: _emailController,
                 style: const TextStyle(fontSize: 18),
                 decoration: InputDecoration(
-                  labelText: 'Usuário (Email ou Nickname)', // Ajuste o label
-                  prefixIcon: const Icon(Icons.person), // Mudança para ícone de pessoa
+                  labelText: 'Usuário (Email ou Nickname)',
+                  prefixIcon: const Icon(Icons.person),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -180,7 +169,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 16),
               TextFormField(
-                controller: _passwordController, // Usando _passwordController para a senha
+                controller: _passwordController,
                 style: const TextStyle(fontSize: 18),
                 decoration: InputDecoration(
                   labelText: 'Senha',
@@ -218,11 +207,10 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Botão para navegar para a tela de registro
+
               TextButton(
                 onPressed: () {
-                  // Certifique-se de que routePaths.registerPage está configurado no Routefly
-                  Routefly.push(routePaths.;
+                  Routefly.push(routePaths.auth.register);
                 },
                 child: Text(
                   'Não tem uma conta? Cadastre-se',
