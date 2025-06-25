@@ -1,41 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:routefly/routefly.dart';
-import 'package:reviewer_mobile/services/auth_service.dart';
-import 'main.route.dart';
-import 'package:reviewer_mobile/theme/theme.dart';
+import 'package:provider/provider.dart';
 
-part 'main.g.dart';
+import 'api/app_api.dart';
+import 'core/config_state.dart';
+import 'core/security_store.dart';
+import 'my_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final authService = AuthService();
-  await authService.init();
+  final storage = SecurityStore();
+  final configState = ConfigState(prefs: storage); // <--- Mudei 'state' para 'configState' para consistência
+  await configState.loadInitialState(); // Garante que o token seja carregado
 
-  runApp(ReviewSocialApp(authService: authService));
-}
+  final appApi = AppApi(config: configState); // Use 'configState' aqui também
 
-@Main()
-class ReviewSocialApp extends StatelessWidget {
-  final AuthService authService;
-
-  const ReviewSocialApp({super.key, required this.authService});
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: authService.isAuthenticated,
-      builder: (context, isAuthenticated, _) {
-        return MaterialApp.router(
-          theme: appTheme,
-          routerConfig: Routefly.routerConfig(
-            routes: routes,
-            initialPath: routePaths.login,
-            notFoundPath: '404',
+  runApp(
+      MultiProvider(
+        providers: [
+          Provider<AppApi>(
+            create: (_) => appApi,
+            dispose: (_, instance) => instance.dispose(),
           ),
-          debugShowCheckedModeBanner: false,
-        );
-      },
-    );
-  }
+          Provider<ConfigState>(
+            create: (_) => configState,
+            dispose: (_, instance) => instance.dispose(),
+          )
+        ],
+        child: const MyApp(),
+      ));
 }
