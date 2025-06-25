@@ -1,25 +1,23 @@
-import 'package:reviewerapi/reviewerapi.dart';
 import 'package:dio/dio.dart';
+import 'package:reviewerapi/src/api/review_controller_api.dart';
+import 'package:reviewerapi/src/model/review_request_dto.dart';
+import 'package:reviewerapi/src/serializers.dart';
 
 class ReviewService {
-  final ReviewControllerApi _reviewApi;
+  final ReviewControllerApi _api;
 
-  ReviewService(this._reviewApi);
+  ReviewService()
+      : _api = ReviewControllerApi(
+    Dio(BaseOptions(baseUrl: 'http://10.0.2.2:8080/api/v1')),
+    serializers,
+  );
 
-  Future<PageReviewListDTO> fetchReviews({int page = 0, int size = 10}) async {
-    try {
-      final response = await _reviewApi.listAll1(page: page, size: size, sort: ['publicationDate,desc']);
-      
-      if (response.statusCode == 200 && response.data != null) {
-        return response.data!;
-      } else {
-        throw Exception("Falha ao carregar as reviews.");
-      }
-    } on DioException catch (e) {
-      print(e);
-      throw Exception("Erro de comunicação com o servidor.");
-    }
+  Future<void> createReview(String title, String content) async {
+    final reviewDTO = ReviewRequestDTO((b) => b
+      ..title = title
+      ..content = content,
+    );
+
+    await _api.createReview(reviewRequestDTO: reviewDTO);
   }
-
-  // Adicione aqui outros métodos: createReview, updateReview, deleteReview, etc.
 }
